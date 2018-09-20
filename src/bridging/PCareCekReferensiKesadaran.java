@@ -37,7 +37,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.web.client.RestTemplate;
 
 /**
  *
@@ -92,6 +91,12 @@ public final class PCareCekReferensiKesadaran extends javax.swing.JDialog {
                 public void changedUpdate(DocumentEvent e) {tampil(diagnosa.getText());}
             });
         } 
+        
+        try {
+            prop.loadFromXML(new FileInputStream("setting/database.xml"));            
+        } catch (Exception e) {
+            System.out.println("E : "+e);
+        }
     }
     
     
@@ -313,8 +318,7 @@ public final class PCareCekReferensiKesadaran extends javax.swing.JDialog {
     public void tampil(String diagnosa) {
         PcareApi api=new PcareApi();
         try {
-            prop.loadFromXML(new FileInputStream("setting/database.xml"));
-            String URL = prop.getProperty("URLAPIPCARE")+"/v1/kesadaran";	
+            String URL = prop.getProperty("URLAPIPCARE")+"/kesadaran";	
 
             HttpHeaders headers = new HttpHeaders();
             headers.add("X-cons-id",prop.getProperty("CONSIDAPIPCARE"));
@@ -323,11 +327,9 @@ public final class PCareCekReferensiKesadaran extends javax.swing.JDialog {
             String otorisasi=prop.getProperty("USERPCARE")+":"+prop.getProperty("PASSPCARE")+":095";
             headers.add("X-Authorization","Basic "+Base64.encodeBase64String(otorisasi.getBytes()));
 	    HttpEntity requestEntity = new HttpEntity(headers);
-	    RestTemplate rest = new RestTemplate();	
-            
-            //System.out.println(rest.exchange(URL, HttpMethod.GET, requestEntity, String.class).getBody());
+	    //System.out.println(rest.exchange(URL, HttpMethod.GET, requestEntity, String.class).getBody());
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(rest.exchange(URL, HttpMethod.GET, requestEntity, String.class).getBody());
+            JsonNode root = mapper.readTree(api.getRest().exchange(URL, HttpMethod.GET, requestEntity, String.class).getBody());
             JsonNode nameNode = root.path("metaData");
             //System.out.println("code : "+nameNode.path("code").asText());
             //System.out.println("message : "+nameNode.path("message").asText());
